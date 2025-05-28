@@ -1,10 +1,9 @@
 import os
-import random as ra
 import json
-from typing_extensions import Annotated
 from rich.console import Console
 from rich.table import Table
 import typer
+from typing_extensions import Annotated
 
 app = typer.Typer()
 console = Console()
@@ -35,14 +34,17 @@ def create():
     repeat_confirmation = True
     while repeat_confirmation:
         task = typer.prompt("Ingresa la tarea que desear agregar")
-        index = len(tasks) + 1
+        if len(tasks) > 0:
+            index = tasks[-1]["index"] + 1
+        else:
+            index = 1
         state = False
         temp = {"index": index, "task": task, "state": state}
         line = json.dumps(temp)
         try:
             with open("todo.md", "a") as f:
                 f.write(str(line) + "\n")
-            tasks.append(line)
+            tasks.append(temp)
             console.print("[bold green]Tarea creada con exito![/bold green]")
             repeat_confirmation = typer.confirm(
                 "Quieres crear otra tarea?")
@@ -59,7 +61,26 @@ def update_tasks_file():
 
 @app.command()
 def delete():
-    pass
+    print_tasks()
+    repeat_confirmation = True
+    while repeat_confirmation:
+        index = typer.prompt(
+            "Escribe el indice de la tarea que quieres eliminar")
+        if is_numeric_string(index):
+            task = index_exist(int(index))
+            if task:
+                tasks.pop(task["index"]-1)
+                update_tasks_file()
+                console.print("[bold green]Lista actializada[/bold green]")
+                print_tasks()
+                repeat_confirmation = typer.confirm(
+                    "Quieres eliminar otra tarea?")
+            else:
+                console.print(
+                    "[bold red]Error el indice ingresado no existe[/bold red]")
+        else:
+            console.print(
+                "[bold red]Error el indice ingresado no es valido[/bold red]")
 
 
 def index_exist(index: int):
@@ -109,6 +130,14 @@ def list(
     console.print("Para agregar una tarea usa el comando [bold green]create[/bold green]\n" +
                   "Para eliminar una tarea usa el comando [bold red]delete[/bold red]\n" +
                   "Para cambiar el estado de una tarea usa [bold blue]check[/bold blue]\n")
+
+
+@app.command()
+def reset(confirmation: Annotated[bool,
+          typer.Option(prompt="Estas seguro de eliminar toda la lista?")]):
+    with open("todo.md", "w") as f:
+        f.write("")
+        console.print("[bold red]Lista eliminada[/bold red]")
 
 
 if __name__ == '__main__':
