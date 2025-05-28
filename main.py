@@ -8,24 +8,21 @@ from typing_extensions import Annotated
 app = typer.Typer()
 console = Console()
 tasks: list[str] = []
-current_action: str = "none"
-
-
-class list_item():
-    def __init__(self, task: str):
-        self.task = task
-
-    def __str__(self):
-        return "{" + f'"task":"{self.task}"' + "}"
 
 
 def print_tasks():
-    table = Table("index", "tasks", "state")
+    table = Table("index", "tasks", "state",
+                  caption_justify="center", highlight=True)
     with open("todo.md", encoding="UTF-8") as f:
         for x in f:
             line = json.loads(x)
-            table.add_row(str(line["index"]),
-                          line["task"], str(line["state"]))
+            state: str
+            if line["state"]:
+                state = "  :white_heavy_check_mark:"
+            else:
+                state = "  :x:"
+            table.add_row(" " + str(line["index"]),
+                          line["task"], state)
     console.print(table)
 
 
@@ -149,8 +146,4 @@ if __name__ == '__main__':
             for x in f:
                 line = json.loads(x)
                 tasks.append(line)
-    # else:
-    #     with open("todo.txt") as f:
-    #         for x in f:
-    #             console.print("[red]"+x+"[/red]")
     app()
