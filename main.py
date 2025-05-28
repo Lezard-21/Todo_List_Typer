@@ -30,12 +30,6 @@ def print_tasks():
     console.print(table)
 
 
-def repeat_question(confirmation: Annotated[bool, typer.Option(
-    prompt=f"Qieres {current_action} otra tarea")]
-):
-    pass
-
-
 @app.command()
 def create():
     repeat_confirmation = True
@@ -56,8 +50,29 @@ def create():
             raise Exception("Error al crear la tarea")
 
 
+def update_tasks_file():
+    with open("todo.md", "w") as f:
+        for x in tasks:
+            temp = json.dumps(x)
+            f.write(str(temp)+"\n")
+
+
+@app.command()
 def delete():
     pass
+
+
+def index_exist(index: int):
+    for x in tasks:
+        if x["index"] == index:
+            return x
+    return None
+
+
+def is_numeric_string(variable: str | int):
+    if isinstance(variable, str):
+        return variable.isdigit() or variable.isnumeric()
+    return False
 
 
 @app.command()
@@ -67,6 +82,22 @@ def check():
     while repeat_confirmation:
         index = typer.prompt(
             "Ingresa el index de la tarea que quieres cambiar de estado")
+        if is_numeric_string(index):
+            task = index_exist(int(index))
+            if task:
+                task["state"] = not task["state"]
+                tasks[task["index"]-1] = task
+                update_tasks_file()
+                console.print("[bold green]Lista actializada[/bold green]")
+                print_tasks()
+                repeat_confirmation = typer.confirm(
+                    "Quieres cambiar el estado de otra tarea?")
+            else:
+                console.print(
+                    "[bold red]Error el indice ingresado no existe[/bold red]")
+        else:
+            console.print(
+                "[bold red]Error el indice ingresado no es valido[/bold red]")
 
 
 @app.command()
