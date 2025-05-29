@@ -51,9 +51,9 @@ Las tareas se guardan en todo.md como JSON, una por línea:
 ```
 
 ## Características
-1.Índices automáticos
-2.Persistencia en archivo
-3.Interfaz con colores y emojis
-4.Confirmaciones para acciones críticas
+-Índices automáticos
+-Persistencia en archivo
+-Interfaz con colores y emojis
+-Confirmaciones para acciones críticas
 
 ##### Nota: El script crea automáticamente el archivo todo.md si no existe
